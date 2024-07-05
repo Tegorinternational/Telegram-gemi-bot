@@ -4,13 +4,9 @@ const { Telegraf, Markup } = require('telegraf');
 const app = express();
 const dotenv = require('dotenv');
 
-
-
 if (process.env.NODE_ENV !== 'production') {
     dotenv.config();
 }
-
-
 
 const bot = new Telegraf(process.env.BOT_TOKEN);
 
@@ -20,7 +16,6 @@ app.use(cors());
 // Mock user data storage
 let username = '';
 let profilePhotoUrl = '';
-
 
 bot.start( async (ctx) => {
     username = ctx.from.username;
@@ -40,34 +35,15 @@ bot.start( async (ctx) => {
     ]));
 });
 
-
 // Endpoint to get the username
 app.get('/user', (req, res) => {
     res.json({ username, profilePhotoUrl });
 });
 
+bot.launch();
 
-
-const localPort = 3000;
-
-
-
-if (process.env.NODE_ENV === 'production') {
-    const PORT = process.env.PORT || localPort;
-    bot.launch({
-        webhook: {
-            domain: process.env.RENDER_EXTERNAL_URL,
-            port: PORT
-        }
-    });
-    app.listen(PORT, () => {
-        console.log(`Server running on port ${PORT}`);
-    });
-} else {
-    bot.launch();
-    app.listen(localPort, () => {
-        console.log(`Server running on port ${localPort}`);
+const port = process.env.PORT || 3000;
+app.listen(port, () => {
+    console.log(`Server running on port ${port}`);
 });
-}
-
 console.log('Bot is running');
