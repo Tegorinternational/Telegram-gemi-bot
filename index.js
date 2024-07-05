@@ -50,23 +50,24 @@ app.get('/user', (req, res) => {
 
 const localPort = 3000;
 
+
+
 if (process.env.NODE_ENV === 'production') {
-    const port = process.env.PORT || localPort;
+    const PORT = process.env.PORT || localPort;
     bot.launch({
         webhook: {
             domain: process.env.RENDER_EXTERNAL_URL,
-            port: port
+            port: PORT
         }
     });
-    app.listen(port, () => {
-        console.log(`Server running on port ${port}`);
+    app.listen(PORT, () => {
+        console.log(`Server running on port ${PORT}`);
     });
-
 } else {
     bot.launch();
     app.listen(localPort, () => {
         console.log(`Server running on port ${localPort}`);
-    });
+});
 }
 
 console.log('Bot is running');
