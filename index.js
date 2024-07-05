@@ -3,7 +3,6 @@ const cors = require('cors');
 const { Telegraf, Markup } = require('telegraf');
 const app = express();
 const dotenv = require('dotenv');
-const localPort = 3000
 
 
 
@@ -49,22 +48,25 @@ app.get('/user', (req, res) => {
 
 
 
+const localPort = 3000;
+
 if (process.env.NODE_ENV === 'production') {
-    const port = process.env.PORT || {localPort};
+    const port = process.env.PORT || localPort;
     bot.launch({
         webhook: {
             domain: process.env.RENDER_EXTERNAL_URL,
             port: port
         }
     });
-    
     app.listen(port, () => {
-    console.log(`Server running on port ${port}`);
-});
+        console.log(`Server running on port ${port}`);
+    });
 
 } else {
     bot.launch();
     app.listen(localPort, () => {
-    console.log(`Server running on port ${localPort}`);
-});
+        console.log(`Server running on port ${localPort}`);
+    });
 }
+
+console.log('Bot is running');
