@@ -43,7 +43,7 @@ bot.start( async (ctx) => {
 
 
 // Endpoint to get the username
-app.get('/username', (req, res) => {
+app.get('/user', (req, res) => {
     res.json({ username, profilePhotoUrl });
 });
 
