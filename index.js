@@ -14,17 +14,14 @@ app.use(cors());
 // Mock user data storage
 let users = {}; // { userId: { username, profilePhotoUrl } }
 let referrals = {}; // { referrerId: [userId, userId, ...] }
-let userid = '';
-let username = '';
-let profilePhotoUrl = '';
 
 bot.start(async (ctx) => {
     const userId = ctx.from.id;
-    userid = ctx.from.id;
-    username = ctx.from.username;
+    const username = ctx.from.username;
     const referrerId = ctx.startPayload;
 
     const photos = await bot.telegram.getUserProfilePhotos(userId);
+    let profilePhotoUrl = '';
     
     if (photos.total_count > 0) {
         const fileId = photos.photos[0][0].file_id;
@@ -51,23 +48,18 @@ bot.start(async (ctx) => {
     ]));
 });
 
-
 bot.action('referral', async (ctx) => {
-  const userId = ctx.from.id;
-  username = ctx.from.username;
-  const refLink = `https://telegram.me/TgGemiAiBot?start=${userId}`;
-  
-  
-  const forwardKeyboard = Markup.inlineKeyboard([
+    const userId = ctx.from.id;
+    const username = ctx.from.username;
+    const refLink = `https://telegram.me/TgGemiAiBot?start=${userId}`;
+    
+    const forwardKeyboard = Markup.inlineKeyboard([
         [Markup.button.switchToChat('Forward to a Friend',`\nTake your welcome bonus:\n💸 2,000 Coins 2X multiplier for the first 24 hours\n🔥 10,000 Coins 3X multiplier if you have Telegram Premium.\n\nUse referral link:\n${refLink}`)]
     ]);
-  
+    
     ctx.answerCbQuery(); // Stop loading state
     await ctx.reply(`Hello ${username},\n\nInvite friends and get bonuses for everyone who signs up 🎁\n\nYour referral link: ${refLink}`, forwardKeyboard); 
-    
 });
-
-
 
 bot.command('referrals', async (ctx) => {
     const referrerId = ctx.message.text.split(' ')[1];
@@ -83,7 +75,7 @@ bot.command('referrals', async (ctx) => {
     }
 
     // Save new user information
-    users[newUserId] = { username: newUsername, refProfilePhotoUrl };
+    users[newUserId] = { username: newUsername, profilePhotoUrl: refProfilePhotoUrl };
 
     // Add the new user to the referrer's referrals
     if (users[referrerId]) {
@@ -98,7 +90,13 @@ bot.command('referrals', async (ctx) => {
 
 // Endpoint to get user info
 app.get('/user/:id', (req, res) => {
-    res.json({ userid, username, profilePhotoUrl });
+    const userId = req.params.id;
+    const user = users[userId];
+    if (user) {
+        res.json(user);
+    } else {
+        res.status(404).json({ error: 'User not found' });
+    }
 });
 
 // Endpoint to get referral info
