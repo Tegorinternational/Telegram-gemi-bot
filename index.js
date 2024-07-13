@@ -43,28 +43,47 @@ bot.start(async (ctx) => {
         referrals[referrerId].push(userId);
     }
 
-    const refLink = `https://telegram.me/TgGemiAiBot?start=${userId} : /start`;
-    await ctx.reply(`Hello, ${username}, Choose an option: ${refLink}`, Markup.inlineKeyboard([
-        Markup.button.url('Launch', 'https://telegram.me/TgGemiAiBot/TgGemiAiWeb'),
-        Markup.button.url('Your Referral Link', `${refLink}`)
+    const refLink = `https://telegram.me/TgGemiAiBot?start=${userId}`;
+    await ctx.reply(`Hello, ${username}, Choose an option`, 
+    Markup.inlineKeyboard([
+        [Markup.button.url('Play & Earn', 'https://telegram.me/TgGemiAiBot/TgGemiAiWeb')],
+        [Markup.button.callback('Get Referral Link', 'referral')]
     ]));
 });
 
-bot.command('referral', async (ctx) => {
+
+bot.action('referral', async (ctx) => {
+  const userId = ctx.from.id;
+  username = ctx.from.username;
+  const refLink = `https://telegram.me/TgGemiAiBot?start=${userId}`;
+  
+  
+  const forwardKeyboard = Markup.inlineKeyboard([
+        [Markup.button.switchToChat('Forward to a Friend',`\nTake your welcome bonus:\n💸 2,000 Coins 2X multiplier for the first 24 hours\n🔥 10,000 Coins 3X multiplier if you have Telegram Premium.\n\nUse referral link:\n${refLink}`)]
+    ]);
+  
+    ctx.answerCbQuery(); // Stop loading state
+    await ctx.reply(`Hello ${username},\n\nInvite friends and get bonuses for everyone who signs up 🎁\n\nYour referral link: ${refLink}`, forwardKeyboard); 
+    
+});
+
+
+
+bot.command('referrals', async (ctx) => {
     const referrerId = ctx.message.text.split(' ')[1];
     const newUserId = ctx.from.id;
     const newUsername = ctx.from.username;
     
     const photos = await bot.telegram.getUserProfilePhotos(newUserId);
-    let profilePhotoUrl = '';
+    let refProfilePhotoUrl = '';
     if (photos.total_count > 0) {
         const fileId = photos.photos[0][0].file_id;
         const file = await bot.telegram.getFile(fileId);
-        profilePhotoUrl = `https://api.telegram.org/file/bot${process.env.BOT_TOKEN}/${file.file_path}`;
+        refProfilePhotoUrl = `https://api.telegram.org/file/bot${process.env.BOT_TOKEN}/${file.file_path}`;
     }
 
     // Save new user information
-    users[newUserId] = { username: newUsername, profilePhotoUrl };
+    users[newUserId] = { username: newUsername, refProfilePhotoUrl };
 
     // Add the new user to the referrer's referrals
     if (users[referrerId]) {
@@ -78,7 +97,7 @@ bot.command('referral', async (ctx) => {
 });
 
 // Endpoint to get user info
-app.get('/user', (req, res) => {
+app.get('/user/:id', (req, res) => {
     res.json({ userid, username, profilePhotoUrl });
 });
 
